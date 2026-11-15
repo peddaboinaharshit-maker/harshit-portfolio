@@ -195,7 +195,7 @@ footer{padding:1.5rem 0;font-size:.85rem;color:var(--mute)}
    EDIT THIS BLOCK ONLY. No other code needs to change.
    ============================================================ */
 const CONFIG = {
-  photo: "images/harshit-photo.jpg",          // e.g. "images/harshit.jpg"
+  photo: "harshit-photo.jpg",          // e.g. "images/harshit.jpg"
   email: "peddaboinaharshit@gmail.com",          // e.g. "name@example.com"
   linkedin: "https://www.linkedin.com/in/peddaboina-harshith-a66851410",       // full profile URL
   other: [            // e.g. { label: "Instagram", url: "https://..." }
@@ -212,17 +212,21 @@ const PROJECTS = [
   { title:"LLR Group Project: Rebranding Indra Nooyi", category:"Academic Projects",
     description:"Group project to choose an Indian business leader and rebrand them through their way of speaking, using ethos, pathos and logos. We rebranded Indra Nooyi, moving her image from celebrated former PepsiCo CEO to an accessible strategy mentor for students and emerging leaders.",
     skills:["Personal branding","Persuasive communication","Audience analysis","Campaign planning","Teamwork"], thumbnail:"",
-    links:{ pptx:"", docx:"", pdf:"docs/LLR-Rebranding-Indra-Nooyi.pdf", external:"" } },
+    links:{ pptx:"", docx:"", pdf:"LLR-Rebranding-Indra-Nooyi.pdf", external:"" } },
   { title:"DIR Group Project: Modern Technology and Local Tourism", category:"Academic Projects",
     description:"Group fieldwork project on AI in the future of work, focused on AI in tourism. Over two days in Chikkamagaluru, Karnataka, we interviewed around 14 tourists and local business people, including coffee estate owners. My role: camera, audio and visual documentation.",
     skills:["Ethnographic fieldwork","Interviewing","Visual documentation","Research ethics","Teamwork"], thumbnail:"",
-    links:{ pptx:"", docx:"", pdf:"docs/DIR-Chikkamagaluru-Fieldwork-Guide.pdf", external:"" } }
+    links:{ pptx:"", docx:"", pdf:"DIR-Chikkamagaluru-Fieldwork-Guide.pdf", external:"" } },
+  { title:"TLM Project: KrishiMithra – AI for Farmers", category:"Academic Projects",
+    description:"AI can put an expert in every farmer's pocket. KrishiMithra (\"farmer's friend\") is an AI assistant I created for a TLM project to help small farmers: it diagnoses crop problems from a photo, advises on sowing, irrigation and fertiliser use, and shares mandi prices and weather alerts in the farmer's own language, Kannada. The video tells the story of a farmer whose hope turns into confidence with AI by his side.",
+    skills:["AI for social good","Agri-tech","Generative AI","Video storytelling"], thumbnail:"krishimithra-thumb.jpg",
+    links:{ video:"KrishiMithra_AI_video_with_audio.mp4" } }
 ];
 /* ============================================================ */
 
 const $ = s => document.querySelector(s);
 const dlg = $("#dlg");
-const LINK_LABELS = { pptx:"PowerPoint", docx:"Word document", pdf:"PDF", external:"External link" };
+const LINK_LABELS = { pptx:"PowerPoint", docx:"Word document", pdf:"PDF", external:"External link", video:"Watch video" };
 const el = (t, props={}, kids=[]) => { const e = Object.assign(document.createElement(t), props); kids.forEach(k => e.append(k)); return e; };
 let current = "All";
 
@@ -255,13 +259,18 @@ function renderProjects(){
   $("#empty").hidden = list.length > 0;
 }
 function openProject(p){
-  const links = Object.entries(p.links).filter(([,u]) => u).map(([k,u]) =>
+  const links = Object.entries(p.links).filter(([k,u]) => u && k !== "video").map(([k,u]) =>
     el("a", { className:"btn fill", href:u, target:"_blank", rel:"noopener", textContent:LINK_LABELS[k] }));
-  const body = $("#dlgBody"); body.replaceChildren(
+  const video = p.links.video ? el("video", { src:p.links.video, controls:true, preload:"metadata",
+    style:{width:"100%",borderRadius:"12px",background:"#000",marginTop:".4rem",aspectRatio:"16/9"} }) : null;
+  const kids = [
     el("span", { className:"cat note", textContent:p.category }),
     el("h3", { textContent:p.title }), el("p", { textContent:p.description }),
-    el("div", { className:"chips" }, p.skills.map(s => el("span", { textContent:s }))),
-    links.length ? el("div", { className:"links" }, links) : el("p", { className:"note", textContent:"No files or links added yet." }));
+    el("div", { className:"chips" }, p.skills.map(s => el("span", { textContent:s }))) ];
+  if (video) kids.push(video);
+  const allLinks = links.length ? links : (p.links.video ? [el("a", { className:"btn fill", href:p.links.video, target:"_blank", rel:"noopener", textContent:LINK_LABELS.video })] : null);
+  kids.push(allLinks ? el("div", { className:"links" }, allLinks) : el("p", { className:"note", textContent:"No files or links added yet." }));
+  const body = $("#dlgBody"); body.replaceChildren(...kids);
   dlg.showModal();
 }
 dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
